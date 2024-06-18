@@ -1,0 +1,11 @@
+{
+  "name": "r4l",
+  "description": "This is an OS r4l abstraction layer developed for cross-kernel drivers",
+  "authors": [{
+    "name": "guoweikang",
+    "email": "guoweikang@kernel.gmail"
+  }],
+  "keywords": ["driver", "r4l"],
+  "repo": "guoweikang/r4l",
+  "doc_url": "https://github.com/guoweikang/r4l/blob/master/README.md"
+}
