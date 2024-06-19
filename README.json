@@ -5,7 +5,7 @@
     "name": "guoweikang",
     "email": "guoweikang@kernel.gmail"
   }],
-  "keywords": ["driver", "r4l"],
-  "repo": "guoweikang/r4l",
-  "doc_url": "https://github.com/guoweikang/r4l/blob/master/README.md"
+  "keywords": ["driver", "r4l", "linux"],
+  "repo": "kern-crates/r4l",
+  "doc_url": "https://github.com/kern-crates/r4l/blob/main/README.md"
 }
