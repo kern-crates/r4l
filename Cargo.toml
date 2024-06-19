@@ -1,7 +1,9 @@
 [workspace]
 members = [
     "drivers/net/phy/ax88796b",
+    "drivers/sample/",
     "r4l/",
+    "macros/",
 ]
 resolver = "2"
 

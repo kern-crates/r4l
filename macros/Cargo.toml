@@ -1,0 +1,16 @@
+[package]
+name = "r4l-macros"
+version = "0.1.0"
+edition = "2021"
+authors = ["Weikang Guo <guoweikang.kernel@gmail.com>"]
+description = "Replace R4L macros"
+license = "GPL-3.0-or-later OR Apache-2.0"
+homepage = ""
+repository = "https://github.com/guoweikang/r4l.git"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "1.0"
+quote = "1.0"

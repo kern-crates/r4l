@@ -1,0 +1,15 @@
+[package]
+name = "r4l_sample"
+version = "0.1.0"
+edition = "2021"
+authors = ["WeiKang Guo <guoweikang.kernel@gmail.com>"]
+description = "An r4l module driver simple sample"
+license = "GPL-3.0-or-later OR Apache-2.0"
+homepage = ""
+repository = "https://github.com/guoweikang/r4l.git"
+
+[features]
+starry = ["kernel/starry"]
+default =["starry"]
+[dependencies]
+kernel = { package="r4l", path = "../../r4l"}

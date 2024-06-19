@@ -1,5 +1,5 @@
 [package]
-name = "r4l-core"
+name = "r4l"
 version = "0.1.0"
 edition = "2021"
 authors = ["Guoweikang <guoweikang.kernel@gmail.com>"]
@@ -9,12 +9,15 @@ homepage = ""
 repository = "https://github.com/guoweikang/r4l.git"
 
 [features]
-starry=["axerrno", "axtask", "axlog", "axhal", "axsync"]
+rust_os=[]
+starry=["rust_os", "axerrno", "axtask", "axlog", "axhal", "axsync", "linked_list"]
 
 [dependencies]
 bitflags = "2.5.0"
 derive_builder = {version ="0.20", default-features = false}
 cfg-if = "1.0"
+
+macros = {package ="r4l-macros", path = "../macros"}
 
 # Arceos Starry dependencies
 axerrno = {git = "https://github.com/Starry-OS/axerrno.git", optional=true}
@@ -22,3 +25,4 @@ axtask = {git = "https://github.com/Starry-OS/axtask.git", optional=true}
 axlog = {git = "https://github.com/Starry-OS/axlog.git", optional=true}
 axhal = {git = "https://github.com/Starry-OS/axhal.git", optional=true}
 axsync = {git = "https://github.com/Starry-OS/axsync.git", optional=true}
+linked_list = {git = "https://github.com/Starry-OS/linked_list.git", optional=true}
