@@ -6,18 +6,23 @@
 
 #![no_std]
 
+extern crate self as kernel;
+
 extern crate alloc;
 
 //mod bus;
-//pub mod str;
-//pub mod uapi;
-//pub mod net;
+pub mod str;
+pub mod uapi;
+pub mod net;
 //pub mod sync;
 pub mod error;
 pub mod linked_list;
 pub mod init;
 pub mod prelude;
 pub mod print;
+mod build_error;
+
+pub use build_error::build_error;
 
 /// The top level entrypoint to implementing a kernel module.
 ///

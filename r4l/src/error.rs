@@ -75,9 +75,12 @@ mod error{
 
 }
 
-pub use error::Error;
-pub use error::code;
+pub use self::error::Error;
+pub use self::error::code;
 
 /// A [`Result`] with an [`Error`] error type.
-pub type Result<T> = core::result::Result<T, Error>;
+pub type Result<T = (), E = Error> = core::result::Result<T, E>;
+/// Error message for calling a default function of a [`#[vtable]`](macros::vtable) trait.
+pub const VTABLE_DEFAULT_ERROR: &str =
+    "This function must not be called, see the #[vtable] documentation.";
 

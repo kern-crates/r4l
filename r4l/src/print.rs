@@ -37,25 +37,25 @@ pub mod log {
             $crate::print::log::axlog::error!($($arg)*)
         );
         ($crate::print::LogLevel::Alert, $($arg:tt)*) => (
-            $crate::axlog::error!($($arg)*)
+            $crate::print::log::axlog::error!($($arg)*)
         );
         ($crate::print::LogLevel::Crit, $($arg:tt)*) => (
-            $crate::axlog::error!($($arg)*)
+            $crate::print::log::axlog::error!($($arg)*)
         );
         ($crate::print::LogLevel::Error, $($arg:tt)*) => (
-            $crate::axlog::error!($($arg)*)
+            $crate::print::log::axlog::error!($($arg)*)
         );
         ($crate::print::LogLevel::Warn, $($arg:tt)*) => (
-            $crate::axlog::warn!($($arg)*)
+            $crate::print::log::axlog::warn!($($arg)*)
         );
         ($crate::print::LogLevel::Info, $($arg:tt)*) => (
             $crate::print::log::axlog::info!($($arg)*)
         );
         ($crate::print::LogLevel::Debug, $($arg:tt)*) => (
-            $crate::axlog::debug!($($arg)*)
+            $crate::print::log::axlog::debug!($($arg)*)
         );
         ($crate::print::LogLevel::Cont, $($arg:tt)*) => (
-            $crate::axlog::info!($($arg)*)
+            $crate::print::log::axlog::info!($($arg)*)
         );
     );
 }

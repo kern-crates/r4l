@@ -6,4 +6,3 @@ cfg_if::cfg_if! {
         pub use self::rust_os::*;
     }
 }
-

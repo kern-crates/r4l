@@ -9,7 +9,8 @@ homepage = ""
 repository = "https://github.com/guoweikang/r4l.git"
 
 [features]
-starry = ["kernel/starry"]
-default =["starry"]
+no_global_oom_handling=[]
+starry  = ["kernel/starry"]
+default = ["starry"]
 [dependencies]
 kernel = { package="r4l", path = "../../r4l"}

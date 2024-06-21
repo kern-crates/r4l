@@ -6,4 +6,3 @@ mod ethtool;
 
 pub use mii::*;
 pub use ethtool::*;
-

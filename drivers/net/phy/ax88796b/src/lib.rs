@@ -43,7 +43,7 @@ struct PhyAX88772A;
 
 #[vtable]
 impl Driver for PhyAX88772A {
-    const FLAGS: u32 = phy::flags::IS_INTERNAL;
+    const FLAGS: PhyDriverFlags = PhyDriverFlags::IS_INTERNAL;
     const NAME: &'static CStr = c_str!("Asix Electronics AX88772A");
     const PHY_DEVICE_ID: DeviceId = DeviceId::new_with_exact_mask(0x003b1861);
 
@@ -107,7 +107,7 @@ struct PhyAX88772C;
 
 #[vtable]
 impl Driver for PhyAX88772C {
-    const FLAGS: u32 = phy::flags::IS_INTERNAL;
+    const FLAGS: PhyDriverFlags = PhyDriverFlags::IS_INTERNAL;
     const NAME: &'static CStr = c_str!("Asix Electronics AX88772C");
     const PHY_DEVICE_ID: DeviceId = DeviceId::new_with_exact_mask(0x003b1881);
 

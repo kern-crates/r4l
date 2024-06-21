@@ -23,13 +23,14 @@ impl kernel::Module for RustMinimal {
         pr_info!("Am I built-in? {}\n", !cfg!(MODULE));
 
         let mut numbers = Vec::new();
-        #[cfg(not(feature ="starry"))] 
+
+        #[cfg(feature ="no_global_oom_handling")] 
         {
             numbers.push(72, GFP_KERNEL)?;
             numbers.push(108, GFP_KERNEL)?;
             numbers.push(200, GFP_KERNEL)?;
         }
-        #[cfg(feature ="starry")] 
+        #[cfg(not(feature ="no_global_oom_handling"))] 
         {
             numbers.push(72);
             numbers.push(108);
