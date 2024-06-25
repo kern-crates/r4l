@@ -36,7 +36,6 @@ bitflags! {
     }
 }
 
-
 pub struct PhyDevice {
   phy_id:u32,
   state: DeviceState,

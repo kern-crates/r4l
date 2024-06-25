@@ -18,8 +18,13 @@
 //! impl PhyDeviceOps for PhyDevice; 
 //!
 
+mod phy_drv;
+mod phy_dev;
+pub use phy_dev::PhyDevice;
+pub use phy_drv::PhyDriver;
+
+
 use crate::{error::*, prelude::*};
-use super::os::{PhyDevice, PhyDriver};
 use core::marker::PhantomData;
 use bitflags::bitflags;
 
@@ -270,6 +275,7 @@ pub const fn create_phy_driver<T: Driver>() -> DriverVTable {
         } else {
             None
         },
+        ..unsafe { core::mem::MaybeUninit::<bindings::phy_driver>::zeroed().assume_init()}
     })
 }
 
@@ -364,10 +370,6 @@ impl Registration {
         if drivers.is_empty() {
             return Err(code::EINVAL);
         }
-        // SAFETY: The type invariants of [`DriverVTable`] ensure that all elements of
-        // the `drivers` slice are initialized properly. `drivers` will not be moved.
-        // So it's just an FFI call.
-
         //to_result(unsafe {
         //     bindings::phy_drivers_register(drivers[0].0.get(), drivers.len().try_into()?, module.0)
         // })?;
@@ -439,17 +441,6 @@ impl DeviceId {
     pub const fn mask_as_int(&self) -> u32 {
         self.mask.as_int()
     }
-
-    /*
-    // macro use only
-    #[doc(hidden)]
-    pub const fn mdio_device_id(&self) -> bindings::mdio_device_id {
-        bindings::mdio_device_id {
-            phy_id: self.id,
-            phy_id_mask: self.mask.as_int(),
-        }
-    }
-    */
 }
 
 enum DeviceMask {
@@ -577,8 +568,6 @@ macro_rules! module_phy_driver {
 
             impl $crate::Module for Module {
                 fn init(module: &'static ThisModule) -> Result<Self> {
-                    // SAFETY: The anonymous constant guarantees that nobody else can access
-                    // the `DRIVERS` static. The array is used only in the C side.
                     let drivers = unsafe { &mut DRIVERS};
                     let mut reg = $crate::net::phy::Registration::register(
                         module,

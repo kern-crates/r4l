@@ -8,7 +8,7 @@
 #[cfg(feature = "starry")]
 mod sync{
     pub use alloc::sync::Arc;
-    pub use alloc::sync::Mutex;
+    pub use axsync::Mutex;
     pub use axsync::spin::SpinNoIrq;
 }
 

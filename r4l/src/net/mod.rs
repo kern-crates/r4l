@@ -1,5 +1,4 @@
 //! Networking.
-
-mod os;
 pub mod phy;
+//pub mod mdio;
 

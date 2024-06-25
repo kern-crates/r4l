@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "drivers/net/phy/ax88796b",
-    "drivers/sample/",
+    "drivers/sample/minimal/",
+    "drivers/sample/platform/",
     "r4l/",
     "macros/",
 ]

@@ -9,11 +9,11 @@ use crate::net::phy::{DeviceId, PhyDriverFlags};
 use crate::error::Result;
 use crate::str::CStr;
 use super::PhyDevice;
-
+use super::{MdioDriverCommon,MDIO_DEVICE_IS_PHY};
 
 pub struct PhyDriver {
   pub name: &'static CStr,
-  pub flags: PhyDriverFlags, 
+  pub flags: PhyDriverFlags,
   pub deviceid: DeviceId,
   pub soft_reset: Option<fn(&mut PhyDevice)-> Result>,
   pub get_features: Option<fn(&mut PhyDevice)-> Result>,
@@ -25,4 +25,19 @@ pub struct PhyDriver {
   pub read_mmd: Option<fn(&mut PhyDevice, u8, u16)-> Result<u16>>,
   pub write_mmd: Option<fn(&mut PhyDevice, u8, u16, u16)-> Result>,
   pub link_change_notify: Option<fn(&mut PhyDevice)>,
+
+  mdiodrv: MdioDriverCommon,
 }
+
+impl PhyDriver {
+    fn register(&mut self) {
+        let device_drv = DeviceDriver::new();
+
+        self.mdiodrv = MdioDriverCommon::new(MDIO_DEVICE_IS_PHY,);
+    }
+}
+
+
+
+
+

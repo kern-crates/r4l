@@ -21,4 +21,4 @@ pub use super::{str::CStr, ThisModule};
 pub use super::error::{code::*, Error, Result};
 pub use crate::build_error::build_error;
 
-pub use crate::net::phy::{PhyDeviceOps, PhyDriverFlags};
+//pub use crate::net::phy::{PhyDeviceOps, PhyDriverFlags};

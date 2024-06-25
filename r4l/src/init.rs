@@ -2,8 +2,16 @@
 
 use core::ffi::{c_int, c_void};
 
-#[cfg(feature="starry")]
 pub fn driver_framework_init() {
+    subsys_fn_init();
+    module_fn_init();
+}
+
+fn subsys_fn_init() {
+ //   crate::net::phy::mdio_bus_init();
+}
+
+fn module_fn_init(){
     let fn_ptr_size = core::mem::size_of::<*const extern "C" fn() -> c_int>();
     let start_addr = _initcall as *const u8;
     let end_addr = _initcall_end as *const u8;
@@ -24,7 +32,6 @@ pub fn driver_framework_init() {
     }
 }
 
-#[cfg(feature="starry")]
 extern "C" {
     fn _initcall();
     fn _initcall_end();

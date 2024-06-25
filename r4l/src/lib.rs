@@ -5,16 +5,25 @@
 //! - log: log interface used by drivers
 
 #![no_std]
+#![feature(associated_type_defaults)]
+#![feature(generic_const_exprs)]
+#![feature(generic_const_items)]
 
 extern crate self as kernel;
 
 extern crate alloc;
 
+//mod driver;
+//pub mod net;
+//pub mod i2c;
 //mod bus;
+pub mod driver;
+pub mod device;
+pub mod platform;
+pub mod of;
 pub mod str;
 pub mod uapi;
-pub mod net;
-//pub mod sync;
+pub mod sync;
 pub mod error;
 pub mod linked_list;
 pub mod init;

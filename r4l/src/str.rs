@@ -20,9 +20,9 @@ mod str{
     #[macro_export]
     macro_rules! c_str {
         ($str:expr) => {{
-                const C: &'static str = $str;
-                C
-            };
+            const C: &'static str = $str;
+            C
+        }
         };
     }
 }
