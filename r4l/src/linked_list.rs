@@ -4,7 +4,7 @@
 //! linked_list
 
 #[cfg(feature = "starry")]
-mod list{
+mod list {
     pub use linked_list::*;
 }
 

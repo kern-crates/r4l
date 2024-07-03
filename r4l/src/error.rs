@@ -1,12 +1,12 @@
 //! Defines the R4L error type.
 //!
 //! Every OS should provides:
-//! - An Error type 
-//! - Errno: const variable in mod code 
-//! 
+//! - An Error type
+//! - Errno: const variable in mod code
+//!
 
 #[cfg(feature = "starry")]
-mod error{
+mod error {
     use axerrno::AxError;
     pub type Error = AxError;
 
@@ -18,8 +18,8 @@ mod error{
             };
         }
 
-        declare_err!(EPERM, "Operation not permitted.",PermissionDenied);
-        declare_err!(ENOENT, "No such file or directory.",NotFound);
+        declare_err!(EPERM, "Operation not permitted.", PermissionDenied);
+        declare_err!(ENOENT, "No such file or directory.", NotFound);
         declare_err!(ESRCH, "No such process.", NotFound);
         declare_err!(EINTR, "Interrupted system call.", Interrupted);
         declare_err!(EIO, "I/O error.", Io);
@@ -72,15 +72,13 @@ mod error{
         //declare_err!(ERECALLCONFLICT, "Conflict with recalled state.");
         //declare_err!(ENOGRACE, "NFS file lock reclaim refused.", );
     }
-
 }
 
-pub use self::error::Error;
 pub use self::error::code;
+pub use self::error::Error;
 
 /// A [`Result`] with an [`Error`] error type.
 pub type Result<T = (), E = Error> = core::result::Result<T, E>;
 /// Error message for calling a default function of a [`#[vtable]`](macros::vtable) trait.
 pub const VTABLE_DEFAULT_ERROR: &str =
     "This function must not be called, see the #[vtable] documentation.";
-

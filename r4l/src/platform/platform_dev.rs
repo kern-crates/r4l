@@ -1,33 +1,28 @@
 // SPDX-License-Identifier: GPL-2.0
 
 //! A platform device.
-//!
-//! # Invariants
-//!
-//! The field `ptr` is non-null and valid for the lifetime of the object.
-//!
+use crate::device;
+use core::any::Any;
+use of::OfNode;
 
-use crate::device::Device;
-
-pub struct PlatformDevice<T> {
-    id: i32,
-    dev: Device<T>,
+pub struct PlatformDevice {
+    device: device::Device,
 }
 
-impl <T> PlatformDevice<T> {
-    /// Returns id of the platform device.
-    pub fn id(&self) -> i32 {
-        self.id
-    }
-
-    #[inline]
-    pub fn get_drv_data(&mut self) -> &mut T {
-        self.dev.get_drv_data()
-    }
-
-    #[inline]
-    pub fn set_drv_data(&mut self, data:T) {
-        self.dev.set_drv_data(data)
+impl PlatformDevice {
+    pub const fn new(of_node: OfNode<'static>) -> Self {
+        PlatformDevice {
+            device: device::Device::new(of_node),
+        }
     }
 }
 
+impl device::DeviceOps for PlatformDevice {
+    fn set_drv_data<T: Any + 'static>(&mut self, drv_data: T) {
+        self.device.set_drv_data(drv_data);
+    }
+
+    fn get_drv_data<T: Any>(&self) -> Option<&T> {
+        self.device.get_drv_data::<T>()
+    }
+}

@@ -1,6 +1,5 @@
-//! From Linux uapi/include/ethtool.h 
+//! From Linux uapi/include/ethtool.h
 //!
-
 
 pub const SPEED_10: u32 = 10;
 pub const SPEED_100: u32 = 100;
@@ -19,4 +18,3 @@ pub const SPEED_200000: u32 = 200000;
 pub const SPEED_400000: u32 = 400000;
 pub const SPEED_800000: u32 = 800000;
 pub const SPEED_UNKNOWN: i32 = -1;
-

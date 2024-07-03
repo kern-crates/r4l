@@ -26,7 +26,7 @@ pub enum LogLevel {
     Cont,
 }
 
-#[cfg(feature = "starry")] 
+#[cfg(feature = "starry")]
 pub mod log {
     pub use axlog;
     #[doc(hidden)]
@@ -281,4 +281,3 @@ macro_rules! pr_cont (
         $crate::log_print!($crate::print::LogLevel::Cont, $($arg)*)
     )
 );
-

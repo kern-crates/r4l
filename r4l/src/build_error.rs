@@ -26,4 +26,3 @@
 pub const fn build_error(msg: &'static str) -> ! {
     panic!("{}", msg);
 }
-

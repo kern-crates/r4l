@@ -24,13 +24,13 @@ impl kernel::Module for RustMinimal {
 
         let mut numbers = Vec::new();
 
-        #[cfg(feature ="no_global_oom_handling")] 
+        #[cfg(feature = "no_global_oom_handling")]
         {
             numbers.push(72, GFP_KERNEL)?;
             numbers.push(108, GFP_KERNEL)?;
             numbers.push(200, GFP_KERNEL)?;
         }
-        #[cfg(not(feature ="no_global_oom_handling"))] 
+        #[cfg(not(feature = "no_global_oom_handling"))]
         {
             numbers.push(72);
             numbers.push(108);

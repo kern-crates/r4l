@@ -1,8 +1,8 @@
 //! Linux uapi
 //!
 
-mod mii;
 mod ethtool;
+mod mii;
 
-pub use mii::*;
 pub use ethtool::*;
+pub use mii::*;

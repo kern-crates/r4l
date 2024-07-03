@@ -18,9 +18,8 @@ impl<T, U, const N: usize> IdArray<T, U, N> {
     ///
     /// The contents are derived from the given identifiers and context information.
     #[doc(hidden)]
-    pub const fn new(ids: [T; N], id_infos: [Option<U>; N]) -> Self
-    {
-        Self {ids,id_infos}
+    pub const fn new(ids: [T; N], id_infos: [Option<U>; N]) -> Self {
+        Self { ids, id_infos }
     }
 }
 
@@ -202,8 +201,9 @@ macro_rules! define_id_array {
 macro_rules! driver_id_table {
     ($table_name:ident, $id_type:ty, $data_type:ty, $target:expr) => {
         const OF_DEVICE_ID_TABLE_SIZE: usize = $target.count();
-        const $table_name: Option<&'static $crate::driver::IdArray<$id_type, $data_type, {$target.count()}>> 
-            = Some(&$target);
+        const $table_name: Option<
+            &'static $crate::driver::IdArray<$id_type, $data_type, { $target.count() }>,
+        > = Some(&$target);
     };
 }
 
@@ -211,8 +211,5 @@ macro_rules! driver_id_table {
 /// ```
 #[macro_export]
 macro_rules! module_id_table {
-    ($item_name:ident, $table_type:literal, $id_type:ty, $table_name:ident) => {
-    };
+    ($item_name:ident, $table_type:literal, $id_type:ty, $table_name:ident) => {};
 }
-
-

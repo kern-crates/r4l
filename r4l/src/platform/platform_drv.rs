@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0
 
-use super::PlatformDevice;
+use super::{platform_driver_register, PlatformDevice};
 use crate::{
-    of,
-    driver,
-    driver::IdArray,
-    error::*,
-    prelude::*,
+    device::DeviceOps, driver, driver::IdArray, error::*, of, prelude::*, sync::Arc, sync::Mutex,
 };
 
-pub struct PlatformDriver<D> {
+pub struct PlatformDriver {
     driver: driver::DeviceDriver,
-    probe: Option<fn(dev: &mut PlatformDevice<D>) -> Result>,
-    remove: Option<fn(dev: &mut PlatformDevice<D>) -> Result>,
+    probe: Option<fn(dev: &mut PlatformDevice) -> Result>,
+    remove: Option<fn(dev: &mut PlatformDevice) -> Result>,
 }
 
-impl <D> Default for PlatformDriver<D> {
+impl Default for PlatformDriver {
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         unsafe {
@@ -25,28 +21,28 @@ impl <D> Default for PlatformDriver<D> {
     }
 }
 
-impl<D> PlatformDriver<D> {
-    fn init(&mut self,
-        probe: fn(dev: &mut PlatformDevice<D>) -> Result, 
-        remove: fn(dev: &mut PlatformDevice<D>) -> Result) 
-    {
+impl PlatformDriver {
+    fn init(
+        &mut self,
+        probe: fn(dev: &mut PlatformDevice) -> Result,
+        remove: fn(dev: &mut PlatformDevice) -> Result,
+    ) {
         self.probe = Some(probe);
         self.remove = Some(remove);
     }
 
-    fn register(&mut self,
-        name: &'static CStr,
-        module: &'static ThisModule) -> Result {
-        self.driver.register(name, module)?;
+    fn register(this: Arc<Self>, name: &'static CStr, module: &'static ThisModule) -> Result {
         Ok(())
     }
 
-    fn unregister(&mut self) {
-    }
+    fn unregister(&mut self) {}
 }
 
 /// A platform driver.
-pub trait Driver where Self: 'static {
+pub trait Driver
+where
+    Self: 'static,
+{
     /// Data stored on RawDeviceIdce by driver.
     ///
     /// Corresponds to the data set or retrieved via the kernel's
@@ -61,14 +57,15 @@ pub trait Driver where Self: 'static {
 
     const OF_DEVICE_ID_TABLE_SIZE: usize = 0;
     /// The table of device ids supported by the driver.
-    const OF_DEVICE_ID_TABLE: Option<&'static IdArray<of::DeviceId, Self::IdInfo, {Self::OF_DEVICE_ID_TABLE_SIZE}>> 
-        where [(); Self::OF_DEVICE_ID_TABLE_SIZE]: ;
+    const OF_DEVICE_ID_TABLE: Option<
+        &'static IdArray<of::DeviceId, Self::IdInfo, { Self::OF_DEVICE_ID_TABLE_SIZE }>,
+    >;
 
     /// Platform driver probe.
     ///
     /// Called when a new platform device is added or discovered.
     /// Implementers should attempt to initialize the device here.
-    fn probe(dev: &mut PlatformDevice<Self::Data>, id_info: Option<&Self::IdInfo>) -> Result<Self::Data>;
+    fn probe(dev: &mut PlatformDevice, id_info: Option<&Self::IdInfo>) -> Result<Self::Data>;
 
     /// Platform driver remove.
     ///
@@ -86,41 +83,48 @@ pub type Registration<T> = driver::Registration<Adapter<T>>;
 pub struct Adapter<T: Driver>(T);
 
 impl<T: Driver> driver::DriverOps for Adapter<T> {
-    type RegType = PlatformDriver<T::Data>;
+    type RegType = Arc<Mutex<PlatformDriver>>;
 
-    fn register(pdrv: &mut Self::RegType,
+    fn register(
+        pdrv: &mut Self::RegType,
         name: &'static CStr,
-        module: &'static ThisModule) -> Result {
-        
-        pdrv.init(Self::probe_callback, Self::remove_callback);
-        pdrv.register(name, module)?;
+        module: &'static ThisModule,
+    ) -> Result {
+        pdrv.lock()
+            .init(Self::probe_callback, Self::remove_callback);
+        pdrv.lock().driver.init(name, module)?;
+        platform_driver_register(pdrv.clone())?;
         Ok(())
     }
 
-    fn unregister(pdrv: &mut Self::RegType) {
-        pdrv.unregister();
-    }
+    fn unregister(pdrv: &mut Self::RegType) {}
 }
 
 impl<T: Driver> Adapter<T> {
-    fn get_id_info(_dev: &PlatformDevice<T::Data>) -> Option<&'static T::IdInfo> {
+    fn get_id_info(_dev: &PlatformDevice) -> Option<&'static T::IdInfo> {
         None
     }
 
-    fn probe_callback(pdev: &mut PlatformDevice<T::Data>) -> Result {
+    fn probe_callback(pdev: &mut PlatformDevice) -> Result {
         let info = Self::get_id_info(&pdev);
         let data = T::probe(pdev, info)?;
         pdev.set_drv_data(data.clone());
         Ok(())
     }
 
-    fn remove_callback(pdev: &mut PlatformDevice<T::Data>) -> Result {
-        let data  = pdev.get_drv_data();
+    fn remove_callback(pdev: &mut PlatformDevice) -> Result {
+        let data = pdev.get_drv_data::<T::Data>().unwrap();
         let ret = T::remove(data);
         <T::Data as driver::DeviceRemoval>::device_remove(data);
         ret?;
         Ok(())
     }
+}
+
+macro_rules! module_platform_device {
+    ($($f:tt)*) => {
+        $crate::module_driver!(<T>, $crate::platform::Adapter<T>, { $($f)* });
+    };
 }
 
 /// Declares a kernel module that exposes a single platform driver.
@@ -154,4 +158,3 @@ macro_rules! module_platform_driver {
         $crate::module_driver!(<T>, $crate::platform::Adapter<T>, { $($f)* });
     };
 }
-

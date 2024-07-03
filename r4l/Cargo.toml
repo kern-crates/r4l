@@ -18,6 +18,7 @@ derive_builder = {version ="0.20", default-features = false}
 cfg-if = "1.0"
 
 macros = {package ="r4l-macros", path = "../macros"}
+of = { git = "https://github.com/Starry-OS/of.git"}
 
 # Arceos Starry dependencies
 axerrno = {git = "https://github.com/Starry-OS/axerrno.git", optional=true}

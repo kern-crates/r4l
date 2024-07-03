@@ -5,11 +5,11 @@
 //! Therefore, we use c_os rust_os feature to distinguish them.
 //!
 #[cfg(feature = "rust_os")]
-mod str{
+mod str {
     pub type CStr = str;
-    
+
     /// Creates a new [`CStr`] from a string literal.
-    /// 
+    ///
     /// empty
     ///
     /// ```
@@ -22,10 +22,8 @@ mod str{
         ($str:expr) => {{
             const C: &'static str = $str;
             C
-        }
-        };
+        }};
     }
 }
 
 pub use str::*;
-

@@ -4,11 +4,7 @@
 
 #![no_std]
 
-use kernel::{
-    module_platform_driver, of, platform, module_driver,
-    prelude::*,
-};
-
+use kernel::{module_driver, module_platform_driver, of, platform, prelude::*};
 
 struct PlatformSampleDriver;
 module_platform_driver! {
@@ -18,7 +14,6 @@ module_platform_driver! {
    description: "Rust minimal sample",
    license: "GPL",
 }
-
 
 // Linux Raw id table
 kernel::module_of_id_table!(SAMPLE_MOD_TABLE, SAMPLE_OF_MATCH_TABLE);
@@ -31,8 +26,7 @@ impl platform::Driver for PlatformSampleDriver {
     type Data = ();
     kernel::driver_of_id_table!(SAMPLE_OF_MATCH_TABLE);
 
-    fn probe(pdev: &mut platform::PlatformDevice<()>, _id_info: Option<&Self::IdInfo>,
-    ) -> Result<()> {
+    fn probe(pdev: &mut platform::PlatformDevice, _id_info: Option<&Self::IdInfo>) -> Result<()> {
         pr_info!("match is impossible");
         Ok(())
     }

@@ -3,16 +3,12 @@
 use core::ops::Deref;
 
 use crate::prelude::*;
-use crate::{
-    sync::Arc,
-    c_str,
-};
+use crate::{c_str, sync::Arc};
 
 use super::IdArray;
 
 pub struct DeviceDriver {
     name: &'static str,
-    //bus: Option<Arc<BusType>>,
     owner: &'static ThisModule,
 }
 
@@ -27,9 +23,7 @@ impl Default for DeviceDriver {
 }
 
 impl DeviceDriver {
-    pub fn register(&mut self,
-      name: &'static str,
-      owner: &'static ThisModule) -> Result {
+    pub fn init(&mut self, name: &'static str, owner: &'static ThisModule) -> Result {
         self.name = name;
         self.owner = owner;
         Ok(())
@@ -51,9 +45,11 @@ pub trait DriverOps {
     ///
     /// On success, `reg` must remain pinned and valid until the matching call to
     /// [`DriverOps::unregister`].
-    fn register(reg: &mut Self::RegType,
+    fn register(
+        reg: &mut Self::RegType,
         name: &'static CStr,
-        module: &'static ThisModule) -> Result;
+        module: &'static ThisModule,
+    ) -> Result;
 
     /// Unregisters a driver previously registered with [`DriverOps::register`].
     ///
@@ -145,7 +141,6 @@ impl<T: DeviceRemoval> DeviceRemoval for Box<T> {
         self.deref().device_remove();
     }
 }
-
 
 /// A kernel module that only registers the given driver on init.
 ///

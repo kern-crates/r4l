@@ -177,4 +177,3 @@ pub(crate) fn module(ts: TokenStream) -> TokenStream {
     .parse()
     .expect("Error parsing formatted string into token stream.")
 }
-

@@ -5,7 +5,7 @@
 //! C header: [`include/linux/of_*.h`](../../../../include/linux/of_*.h)
 
 /// An open firmware device id.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum DeviceId {
     /// An open firmware device id where only a compatible string is specified.
     Compatible(&'static str),

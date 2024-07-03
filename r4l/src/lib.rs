@@ -16,20 +16,20 @@ extern crate alloc;
 //mod driver;
 //pub mod net;
 //pub mod i2c;
-//mod bus;
-pub mod driver;
+mod build_error;
+mod bus;
 pub mod device;
-pub mod platform;
-pub mod of;
-pub mod str;
-pub mod uapi;
-pub mod sync;
+pub mod driver;
 pub mod error;
-pub mod linked_list;
 pub mod init;
+pub mod linked_list;
+pub mod of;
+pub mod platform;
 pub mod prelude;
 pub mod print;
-mod build_error;
+pub mod str;
+pub mod sync;
+pub mod uapi;
 
 pub use build_error::build_error;
 
@@ -45,7 +45,6 @@ pub trait Module: Sized + Sync + Send {
     /// Equivalent to the `module_init` macro in the C API.
     fn init(module: &'static ThisModule) -> error::Result<Self>;
 }
-
 
 /// Replace Linux `THIS_MODULE` in the C API.
 ///

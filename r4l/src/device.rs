@@ -5,33 +5,33 @@
 //! C header: [`include/linux/device.h`](../../../../include/linux/device.h)
 //!
 
-//use crate::bus::BusType;
-use crate::Module;
-use crate::driver::DeviceDriver;
+use crate::prelude::Box;
+use core::any::Any;
+use of::OfNode;
 
-pub struct Device<T> {
-    //driver: Option<Arc<DeviceDriver>>,
-    init_name: &'static str,
-    //bus: Arc<BusType>,
-    driver_data: Option<T>,
+pub struct Device {
+    of_node: OfNode<'static>,
+    drv_data: Option<Box<dyn Any>>,
 }
 
-impl<T> Device<T> {
-    pub const fn new() -> Self {
+impl Device {
+    pub const fn new(of_node: OfNode<'static>) -> Self {
         Device {
-            //driver: None, 
-            //bus,
-            init_name: "empty",
-            driver_data: None,
+            of_node,
+            drv_data: None,
         }
     }
 
-    pub fn set_drv_data(&mut self, data:T) {
-        self.driver_data = Some(data);
+    pub fn set_drv_data<T: Any + 'static>(&mut self, drv_data: T) {
+        self.drv_data = Some(Box::new(drv_data));
     }
 
-    pub fn get_drv_data(&mut self) -> &mut T {
-        self.driver_data.as_mut().expect("no drv data")
+    pub fn get_drv_data<T: Any>(&self) -> Option<&T> {
+        self.drv_data.as_ref()?.downcast_ref::<T>()
     }
 }
 
+pub trait DeviceOps {
+    fn set_drv_data<T: Any + 'static>(&mut self, drv_data: T);
+    fn get_drv_data<T: Any>(&self) -> Option<&T>;
+}

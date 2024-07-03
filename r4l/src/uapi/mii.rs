@@ -1,4 +1,4 @@
-//! From Linux uapi/include/mii.h 
+//! From Linux uapi/include/mii.h
 //!
 //!
 
@@ -25,8 +25,6 @@ pub const MII_PHYADDR: u32 = 25;
 pub const MII_RESV2: u32 = 26;
 pub const MII_TPISTATUS: u32 = 27;
 pub const MII_NCONFIG: u32 = 28;
-
-
 
 pub const BMCR_RESV: u32 = 63;
 pub const BMCR_SPEED1000: u32 = 64;
