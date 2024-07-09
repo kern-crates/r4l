@@ -2,13 +2,17 @@
 
 use super::{platform_driver_register, PlatformDevice};
 use crate::{
-    device::DeviceOps, driver, driver::IdArray, error::*, of, prelude::*, sync::Arc, sync::Mutex,
+    device::DeviceOps, driver, driver::IdArray, driver::IdTable, error::*, of, prelude::*,
+    sync::Arc, sync::Mutex,
 };
+
+type PlatformIdTable = &'static [of::DeviceId];
 
 pub struct PlatformDriver {
     driver: driver::DeviceDriver,
-    probe: Option<fn(dev: &mut PlatformDevice) -> Result>,
+    pub probe: Option<fn(dev: Arc<Mutex<PlatformDevice>>) -> Result>,
     remove: Option<fn(dev: &mut PlatformDevice) -> Result>,
+    id_table: Option<PlatformIdTable>,
 }
 
 impl Default for PlatformDriver {
@@ -24,11 +28,13 @@ impl Default for PlatformDriver {
 impl PlatformDriver {
     fn init(
         &mut self,
-        probe: fn(dev: &mut PlatformDevice) -> Result,
+        probe: fn(dev: Arc<Mutex<PlatformDevice>>) -> Result,
         remove: fn(dev: &mut PlatformDevice) -> Result,
+        id_table: Option<PlatformIdTable>,
     ) {
         self.probe = Some(probe);
         self.remove = Some(remove);
+        self.id_table = id_table;
     }
 
     fn register(this: Arc<Self>, name: &'static CStr, module: &'static ThisModule) -> Result {
@@ -36,6 +42,10 @@ impl PlatformDriver {
     }
 
     fn unregister(&mut self) {}
+
+    pub fn id_table(&self) -> Option<PlatformIdTable> {
+        self.id_table
+    }
 }
 
 /// A platform driver.
@@ -57,9 +67,7 @@ where
 
     const OF_DEVICE_ID_TABLE_SIZE: usize = 0;
     /// The table of device ids supported by the driver.
-    const OF_DEVICE_ID_TABLE: Option<
-        &'static IdArray<of::DeviceId, Self::IdInfo, { Self::OF_DEVICE_ID_TABLE_SIZE }>,
-    >;
+    const OF_DEVICE_ID_TABLE: Option<&'static [of::DeviceId]> = None;
 
     /// Platform driver probe.
     ///
@@ -90,8 +98,11 @@ impl<T: Driver> driver::DriverOps for Adapter<T> {
         name: &'static CStr,
         module: &'static ThisModule,
     ) -> Result {
-        pdrv.lock()
-            .init(Self::probe_callback, Self::remove_callback);
+        pdrv.lock().init(
+            Self::probe_callback,
+            Self::remove_callback,
+            T::OF_DEVICE_ID_TABLE,
+        );
         pdrv.lock().driver.init(name, module)?;
         platform_driver_register(pdrv.clone())?;
         Ok(())
@@ -101,13 +112,14 @@ impl<T: Driver> driver::DriverOps for Adapter<T> {
 }
 
 impl<T: Driver> Adapter<T> {
-    fn get_id_info(_dev: &PlatformDevice) -> Option<&'static T::IdInfo> {
+    fn get_id_info(pdev: &PlatformDevice) -> Option<&'static T::IdInfo> {
         None
     }
 
-    fn probe_callback(pdev: &mut PlatformDevice) -> Result {
+    fn probe_callback(pdev: Arc<Mutex<PlatformDevice>>) -> Result {
+        let mut pdev = pdev.lock();
         let info = Self::get_id_info(&pdev);
-        let data = T::probe(pdev, info)?;
+        let data = T::probe(&mut pdev, info)?;
         pdev.set_drv_data(data.clone());
         Ok(())
     }

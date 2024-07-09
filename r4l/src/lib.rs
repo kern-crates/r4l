@@ -13,7 +13,6 @@ extern crate self as kernel;
 
 extern crate alloc;
 
-//mod driver;
 //pub mod net;
 //pub mod i2c;
 mod build_error;

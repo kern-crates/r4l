@@ -1,8 +1,13 @@
 use super::{PlatformDevice, PlatformDriver};
-use crate::bus::BusType;
-use crate::error::*;
-use crate::sync::{Arc, Mutex};
 use alloc::collections::VecDeque;
+
+use crate::bus::BusType;
+use crate::device::DeviceOps;
+use crate::error::*;
+use crate::of::DeviceId::Compatible;
+use crate::pr_info;
+use crate::prelude::Vec;
+use crate::sync::{Arc, Mutex};
 
 pub struct PlatformBus {
     devices: VecDeque<Arc<Mutex<PlatformDevice>>>,
@@ -26,8 +31,26 @@ impl BusType for PlatformBus {
     type Device = Arc<Mutex<PlatformDevice>>;
     type Driver = Arc<Mutex<PlatformDriver>>;
 
-    fn bus_match(&self, device: Self::Device, driver: Self::Driver) -> bool {
-        true
+    fn bus_driver_match(&self, pdrv: Self::Driver) -> Vec<Self::Device> {
+        let mut matched_pdev = Vec::new();
+        let table = pdrv
+            .lock()
+            .id_table()
+            .expect("platform driver not define Compatible Table");
+        for dev in self.devices.iter() {
+            for id in table {
+                match id {
+                    Compatible(id) => {
+                        if dev.lock().compatible_match(id) {
+                            pr_info!("driver : {} device matched", id);
+                            matched_pdev.push(dev.clone());
+                        }
+                    }
+                    _ => panic!("invalid id table"),
+                }
+            }
+        }
+        matched_pdev
     }
 
     fn add_device(&mut self, device: Self::Device) -> Result {
@@ -48,8 +71,17 @@ pub fn platform_device_register(device: <PlatformBus as BusType>::Device) -> Res
     Ok(())
 }
 
-pub fn platform_driver_register(driver: <PlatformBus as BusType>::Driver) -> Result {
+pub fn platform_driver_register(pdrv: <PlatformBus as BusType>::Driver) -> Result {
     let mut bus = PLATFORM_BUS.lock();
-    bus.add_driver(driver)?;
+    bus.add_driver(pdrv.clone())?;
+    let matchde_pdev = bus.bus_driver_match(pdrv.clone());
+    // before probe, unlock bus
+    drop(bus);
+    for pdev in matchde_pdev {
+        match pdrv.lock().probe {
+            Some(fn_probe) => fn_probe(pdev)?,
+            None => panic!("pdev not have probe call back"),
+        }
+    }
     Ok(())
 }

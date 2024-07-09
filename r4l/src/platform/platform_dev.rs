@@ -25,4 +25,8 @@ impl device::DeviceOps for PlatformDevice {
     fn get_drv_data<T: Any>(&self) -> Option<&T> {
         self.device.get_drv_data::<T>()
     }
+
+    fn compatible_match(&self, compatible: &'static str) -> bool {
+        self.device.compatible_match(compatible)
+    }
 }

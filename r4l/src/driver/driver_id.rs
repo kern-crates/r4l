@@ -9,6 +9,13 @@ pub struct IdArray<T, U, const N: usize> {
 impl<T, U, const N: usize> IdArray<T, U, N> {
     const U_NONE: Option<U> = None;
 
+    /// Returns an `IdTable` backed by `self`.
+    ///
+    /// This is used to essentially erase the array size.
+    pub const fn as_table(&'static self) -> &'static [T] {
+        &self.ids
+    }
+
     /// Returns the number of items in the ID table.
     pub const fn count(&self) -> usize {
         self.ids.len()
@@ -40,6 +47,10 @@ macro_rules! _new_id_array {
         }
         new($($args)*)
     }}
+}
+
+pub struct IdTable<'a, T> {
+    pub array: &'a [T],
 }
 
 /// Counts the number of parenthesis-delimited, comma-separated items.
@@ -201,9 +212,7 @@ macro_rules! define_id_array {
 macro_rules! driver_id_table {
     ($table_name:ident, $id_type:ty, $data_type:ty, $target:expr) => {
         const OF_DEVICE_ID_TABLE_SIZE: usize = $target.count();
-        const $table_name: Option<
-            &'static $crate::driver::IdArray<$id_type, $data_type, { $target.count() }>,
-        > = Some(&$target);
+        const $table_name: Option<&'static [$id_type]> = Some($target.as_table());
     };
 }
 

@@ -19,7 +19,7 @@ module_platform_driver! {
 kernel::module_of_id_table!(SAMPLE_MOD_TABLE, SAMPLE_OF_MATCH_TABLE);
 // R4L IdArray table
 kernel::define_of_id_table! {SAMPLE_OF_MATCH_TABLE, (), [
-    (of::DeviceId::Compatible("cicv,sample"),None),
+    (of::DeviceId::Compatible("snps,dw-apb-uart"),None),
 ]}
 
 impl platform::Driver for PlatformSampleDriver {
@@ -27,7 +27,7 @@ impl platform::Driver for PlatformSampleDriver {
     kernel::driver_of_id_table!(SAMPLE_OF_MATCH_TABLE);
 
     fn probe(pdev: &mut platform::PlatformDevice, _id_info: Option<&Self::IdInfo>) -> Result<()> {
-        pr_info!("match is impossible");
+        pr_info!("platform driver probe success");
         Ok(())
     }
 }

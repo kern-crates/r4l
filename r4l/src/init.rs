@@ -19,7 +19,7 @@ fn module_fn_init() {
     let end_addr = _initcall_end as *const u8;
     let mut current_addr = start_addr;
 
-    crate::pr_debug!(
+    crate::pr_info!(
         "enter driver_framework_init start_Addr {:p}  end_Addr{:p}",
         start_addr,
         end_addr
