@@ -29,6 +29,7 @@ pub mod print;
 pub mod str;
 pub mod sync;
 pub mod uapi;
+pub mod irq;
 
 pub use build_error::build_error;
 

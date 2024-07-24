@@ -5,6 +5,8 @@ use crate::device;
 use core::any::Any;
 use of::OfNode;
 
+use crate::error::Result;
+
 pub struct PlatformDevice {
     device: device::Device,
 }
@@ -14,6 +16,13 @@ impl PlatformDevice {
         PlatformDevice {
             device: device::Device::new(of_node),
         }
+    }
+}
+
+impl PlatformDevice {
+    /// Returns irq of the platform device.
+    pub fn irq_resource(&self, index: u32) -> Result<i32> {
+        self.device.irq_resource(index)
     }
 }
 

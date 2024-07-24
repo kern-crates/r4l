@@ -24,6 +24,17 @@ mod str {
             C
         }};
     }
+
+    use alloc::string::String;
+    use core::fmt;
+    use crate::prelude::Error;
+
+    pub struct CString(String);
+    impl CString {
+        pub fn try_from_fmt(args: fmt::Arguments<'_>) -> Result<Self, Error> {
+            Ok(Self(alloc::format!("{}",args)))
+        }
+    }
 }
 
 pub use str::*;
