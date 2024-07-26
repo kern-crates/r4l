@@ -28,15 +28,17 @@ struct ModuleInfo {
     name: String,
     author: Option<String>,
     description: Option<String>,
+    initcall: String,
     alias: Option<Vec<String>>,
 }
 
 impl ModuleInfo {
     fn parse(it: &mut token_stream::IntoIter) -> Self {
         let mut info = ModuleInfo::default();
+        info.initcall = ".initcall6.init".to_string();
 
         const EXPECTED_KEYS: &[&str] =
-            &["type", "name", "author", "description", "license", "alias"];
+            &["type", "name", "author", "description", "license", "initcall", "alias"];
         const REQUIRED_KEYS: &[&str] = &["type", "name", "license"];
         let mut seen_keys = Vec::new();
 
@@ -62,6 +64,7 @@ impl ModuleInfo {
                 "author" => info.author = Some(expect_string(it)),
                 "description" => info.description = Some(expect_string(it)),
                 "license" => info.license = expect_string_ascii(it),
+                "initcall" => info.initcall = expect_string_initcall(it),
                 "alias" => info.alias = Some(expect_string_array(it)),
                 _ => panic!(
                     "Unknown key \"{}\". Valid keys are: {:?}.",
@@ -172,7 +175,7 @@ pub(crate) fn module(ts: TokenStream) -> TokenStream {
         ",
         type_ = info.type_,
         name = info.name,
-        initcall_section = ".initcall"
+        initcall_section = info.initcall
     )
     .parse()
     .expect("Error parsing formatted string into token stream.")
