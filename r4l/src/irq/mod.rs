@@ -26,12 +26,12 @@ use core::any::Any;
 /// The return value from interrupt handlers.
 pub enum Return {
     /// The interrupt was not from this device or was not handled.
-    None, 
+    None,
     /// The interrupt was handled by this device.
-    Handled ,
+    Handled,
     /// The handler wants the handler thread to wake up.
     /// Maybe os not support this
-    WakeThread, 
+    WakeThread,
 }
 
 struct InternalRegistration {

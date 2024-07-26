@@ -1,5 +1,5 @@
 [package]
-name = "i2c-designware"
+name = "i2c_designware"
 version = "0.1.0"
 edition = "2021"
 authors = ["WeiKang Guo <guoweikang.kernel@gmail.com>"]
@@ -13,4 +13,4 @@ no_global_oom_handling=[]
 starry  = ["kernel/starry"]
 default = ["starry"]
 [dependencies]
-kernel = { package="r4l", path = "../../r4l"}
+kernel = { package="r4l", path = "../../../../r4l"}

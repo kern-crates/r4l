@@ -33,7 +33,7 @@ pub fn of_platform_default_populate_init() -> Result {
                 (Some(i), None) => {
                     crate::pr_info!("create platform {:?} child device none", i.first())
                 }
-                _ => panic!("no imposible"),
+                _ => panic!("imposible"),
             }
         }
     }

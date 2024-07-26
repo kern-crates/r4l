@@ -26,9 +26,8 @@ impl Device {
         }
     }
 
-    pub fn irq_resource(&self, index: u32) -> Result<i32> {
-        let parent = of::of_irq_find_parent(self.of_node).ok_or(EINVAL);
-        Ok(0)
+    pub fn irq_resource(&self, index: usize) -> Result<u32> {
+        crate::of::of_irq_get(self.of_node, index)
     }
 
     pub fn set_drv_data<T: Any + 'static>(&mut self, drv_data: T) {

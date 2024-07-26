@@ -21,7 +21,7 @@ impl PlatformDevice {
 
 impl PlatformDevice {
     /// Returns irq of the platform device.
-    pub fn irq_resource(&self, index: u32) -> Result<i32> {
+    pub fn irq_resource(&self, index: usize) -> Result<u32> {
         self.device.irq_resource(index)
     }
 }

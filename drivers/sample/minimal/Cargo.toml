@@ -1,5 +1,5 @@
 [package]
-name = "r4l_sample"
+name = "r4l_minimal_sample"
 version = "0.1.0"
 edition = "2021"
 authors = ["WeiKang Guo <guoweikang.kernel@gmail.com>"]
