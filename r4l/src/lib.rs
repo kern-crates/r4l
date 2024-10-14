@@ -37,6 +37,9 @@ pub mod math;
 pub mod delay;
 pub mod timekeeping;
 
+/// driver
+pub mod i2c;
+
 pub use build_error::build_error;
 
 /// The top level entrypoint to implementing a kernel module.
