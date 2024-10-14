@@ -29,9 +29,13 @@ pub mod print;
 pub mod str;
 pub mod sync;
 pub mod uapi;
+pub mod types;
 pub mod irq;
 pub mod io;
 pub mod regmap;
+pub mod math;
+pub mod delay;
+pub mod timekeeping;
 
 pub use build_error::build_error;
 

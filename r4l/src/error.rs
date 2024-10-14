@@ -18,6 +18,7 @@ mod error {
             };
         }
 
+        declare_err!(ETIMEDOUT, "Operation timeout", Timeout);
         declare_err!(EPERM, "Operation not permitted.", PermissionDenied);
         declare_err!(ENOENT, "No such file or directory.", NotFound);
         declare_err!(ESRCH, "No such process.", NotFound);

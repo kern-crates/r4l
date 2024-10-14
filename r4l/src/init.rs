@@ -33,7 +33,7 @@ fn initcall(pair: InitcallAddrPair) {
         let func: extern "C" fn() -> c_int =
             unsafe { core::mem::transmute(func_ptr_value as *const extern "C" fn() -> c_int) };
         let result = func();
-        crate::pr_info!("Function at address {:p} returned: {}",current_addr,result);
+        crate::pr_info!("Function at address {:p} returned: {}", current_addr, result);
         if result < 0 {
             panic!("driver module init call failed");
         }
