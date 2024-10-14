@@ -3,6 +3,7 @@ members = [
     "drivers/net/phy/ax88796b",
     "drivers/sample/minimal/",
     "drivers/sample/platform/",
+    "drivers/i2c/busses/i2c-designware",
     "r4l/",
     "macros/",
 ]
