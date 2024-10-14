@@ -10,6 +10,7 @@ mod sync {
     pub use alloc::sync::Arc;
     pub use axsync::spin::{self, SpinNoIrq, SpinNoPreempt};
     pub use axsync::Mutex;
+    // pub use axsync::Completion;
 
     pub type  SpinLock<T> = SpinNoPreempt<T>;
 }

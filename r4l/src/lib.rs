@@ -35,6 +35,7 @@ pub mod io;
 pub mod regmap;
 pub mod math;
 pub mod delay;
+// pub mod completion;
 pub mod timekeeping;
 
 /// driver
