@@ -7,6 +7,7 @@
 
 use crate::pr_info;
 use crate::prelude::*;
+use crate::platform::PlatformDevice;
 use core::any::Any;
 use of::OfNode;
 
@@ -26,6 +27,10 @@ impl Device {
         }
     }
 
+    pub fn get_resource(&self, index: usize) -> Result<usize> {
+        crate::of::of_membase_resource_get(self.of_node, index)
+    }
+
     pub fn irq_resource(&self, index: usize) -> Result<u32> {
         crate::of::of_irq_get(self.of_node, index)
     }
@@ -43,6 +48,18 @@ impl Device {
             Some(n) => n.all().find(|one| *one == compatible).is_some(),
             None => false,
         }
+    }
+
+    pub fn device_property_read_u32(&self, propname: &'static CStr) -> Result<u32> {
+        let res = of::of_property_read_u32(self.of_node, propname, 0);
+        match res {
+            Some(val) => { Ok(val)}
+            None => { Err(EINVAL) }
+        }
+    }
+
+    pub fn from_dev(pdev: &PlatformDevice) -> &Self {
+        pdev.get_device()
     }
 }
 

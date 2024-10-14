@@ -5,20 +5,19 @@ use of::OfNode;
 
 const MAX_PHANDLE_ARGS: usize = 32;
 struct OfPhandleArgs {
-    np: OfNode<'static>,
+    np: Option<OfNode<'static>>,
     args_count: usize,
     args: [u32; MAX_PHANDLE_ARGS],
 }
 
 impl OfPhandleArgs {
-    fn of_irq_parse_one(node: OfNode<'static>, index: usize)
-        -> Result<Self>  {
+    fn of_irq_parse_one(node: OfNode<'static>, index: usize) -> Result<Self>  {
         let parent = node.interrupt_parent().ok_or(EINVAL)?;
         let intsize = parent.interrupt_cells().ok_or(EINVAL)?;
         
         pr_debug!("irq {} parent intsize={}\n",parent.compatible().unwrap().first(), intsize);
 
-        let mut res = Self{np: parent, args_count: intsize, args: [0;MAX_PHANDLE_ARGS]};
+        let mut res = Self{np: Some(parent), args_count: intsize, args: [0;MAX_PHANDLE_ARGS]};
 
         for i in 0..intsize {
             res.args[i] = of::of_property_read_u32(node, "interrupts", (index * intsize) + i).ok_or(EINVAL)?;
@@ -27,7 +26,14 @@ impl OfPhandleArgs {
         // TODO: Check if there are any interrupt-map translations to process 
         Ok(res)
     }
+
+    fn of_reg_parse_one(node: OfNode<'static>, _index: usize) -> Result<usize>  {
+        let reg = node.reg().ok_or(EINVAL)?.next().unwrap();
+        pr_debug!("starting_address is {:#x} , size={} \n", reg.starting_address as usize, reg.size.unwrap());
+        Ok(reg.starting_address as usize)
+    }
 }
+
 
 pub fn of_irq_get(node: OfNode<'static>, index: usize) -> Result<u32> {
     let oirq = OfPhandleArgs::of_irq_parse_one(node, index)?;
@@ -35,4 +41,9 @@ pub fn of_irq_get(node: OfNode<'static>, index: usize) -> Result<u32> {
         panic!("now only support arm interrupt")
     }
     Ok(oirq.args[1])
+}
+
+pub fn of_membase_resource_get(node: OfNode<'static>, index: usize) -> Result<usize> {
+    let base = OfPhandleArgs::of_reg_parse_one(node, index)?;
+    Ok(base)
 }

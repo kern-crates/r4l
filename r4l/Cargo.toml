@@ -10,7 +10,7 @@ repository = "https://github.com/guoweikang/r4l.git"
 
 [features]
 rust_os=[]
-starry=["rust_os", "axerrno", "axtask", "axlog", "axhal", "axsync", "linked_list"]
+starry=["rust_os", "axerrno", "axtask/irq", "axlog", "axhal", "axsync/irq", "linked_list"]
 
 [dependencies]
 bitflags = "2.5.0"

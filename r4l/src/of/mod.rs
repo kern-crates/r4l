@@ -2,8 +2,8 @@
 
 mod device_id;
 mod platform;
-mod irq;
+mod resource;
 
 pub use device_id::*;
 pub use platform::*;
-pub use irq::*;
+pub use resource::*;
