@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#[cfg(feature = "starry")]
+#[cfg(feature = "arceos")]
 mod os_io_interface {
     use axhal::mem::{phys_to_virt, PhysAddr};
 

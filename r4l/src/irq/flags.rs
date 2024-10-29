@@ -6,7 +6,7 @@ bitflags! {
     /// Container for interrupt flags.
     #[repr(transparent)]
     #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-    pub struct Flags: u32 {
+    pub struct Flags: usize {
         /// Use the interrupt line as already configured.
         const TRIGGER_NONE = 1;
         /// The interrupt is triggered when the signal goes from low to high.

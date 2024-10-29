@@ -3,7 +3,7 @@
 //! Every OS should provides:
 //! linked_list
 
-#[cfg(feature = "starry")]
+#[cfg(feature = "arceos")]
 mod list {
     pub use linked_list::*;
 }

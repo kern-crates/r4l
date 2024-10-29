@@ -10,7 +10,7 @@ repository = "https://github.com/guoweikang/r4l.git"
 
 [features]
 rust_os=[]
-starry=["rust_os", "axerrno", "axtask/irq", "axlog", "axhal", "axsync/irq", "linked_list"]
+arceos=["rust_os", "axerrno", "axtask/irq", "axlog", "axhal", "axsync", "linked_list"]
 
 [dependencies]
 bitflags = "2.5.0"
@@ -18,12 +18,12 @@ derive_builder = {version ="0.20", default-features = false}
 cfg-if = "1.0"
 
 macros = {package ="r4l-macros", path = "../macros"}
-of = { git = "https://github.com/Starry-OS/of.git"}
+of_fdt = {package ="of_fdt", path = "../of"}
 
 # Arceos Starry dependencies
+axtask = { workspace = true, optional = true }
+axlog = { workspace = true, optional = true  }
+axhal = { workspace = true, optional = true }
+axsync = { workspace = true, optional = true }
 axerrno = {git = "https://github.com/Starry-OS/axerrno.git", optional=true}
-axtask = {git = "https://github.com/Starry-OS/axtask.git", optional=true}
-axlog = {git = "https://github.com/Starry-OS/axlog.git", optional=true}
-axhal = {git = "https://github.com/Starry-OS/axhal.git", optional=true}
-axsync = {git = "https://github.com/Starry-OS/axsync.git", optional=true}
 linked_list = {git = "https://github.com/Starry-OS/linked_list.git", optional=true}

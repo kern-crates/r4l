@@ -1,7 +1,7 @@
 //! I2c delay interface
 //!
 
-#[cfg(feature = "starry")]
+#[cfg(feature = "arceos")]
 mod delay {
     pub use axtask::sleep;
 }

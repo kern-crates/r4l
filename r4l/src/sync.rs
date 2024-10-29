@@ -5,7 +5,7 @@
 //! - Mutex
 //! - SpinLock
 
-#[cfg(feature = "starry")]
+#[cfg(feature = "arceos")]
 mod sync {
     pub use alloc::sync::Arc;
     pub use axsync::spin::{self, SpinNoIrq, SpinNoPreempt};

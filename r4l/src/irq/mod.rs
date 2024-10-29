@@ -45,7 +45,7 @@ impl  InternalRegistration {
         irq: u32,
         handler: IrqHandler,
         _thread_fn: Option<IrqHandler>,
-        flags: usize,
+        flags: Flags,
         name: fmt::Arguments<'_>,
     ) -> Result<Self> {
         let name = CString::try_from_fmt(name)?;
@@ -88,13 +88,13 @@ pub trait Handler {
 /// impl irq::Handler for Example {
 ///     type Data = Box<u32>;
 ///
-///     fn handle_irq(_data: &u32) -> irq::Return {
+///     fn handle_irq(_data: &Self::Data) -> irq::Return {
 ///         irq::Return::None
 ///     }
 /// }
 ///
 /// fn request_irq(irq: u32, data: Box<u32>) -> Result<irq::Registration<Example>> {
-///     irq::Registration::try_new(irq, data, irq::flags::SHARED, fmt!("example_{irq}"))
+///     irq::Registration::try_new(irq, data, irq::Flags::SHARED, fmt!("example_{irq}"))
 /// }
 /// ```
 pub struct Registration(InternalRegistration);
@@ -119,14 +119,14 @@ impl Registration {
     pub fn try_new<H: Handler> (
         irq: u32,
         data: H::Data,
-        flags: usize,
+        flags: Flags,
         name: fmt::Arguments<'_>,
     ) -> Result<Self>  where <H as Handler>::Data: 'static {
         IRQ_DATA_ARRAY.lock().push(IrqData{data: Box::new(data), irq});
         Ok(Self(InternalRegistration::try_new(irq, Self::handler::<H>, None, flags, name)?))
     }
 
-    #[cfg(feature = "starry")]
+    #[cfg(feature = "arceos")]
     fn handler<H: Handler> (irq:u32) where <H as Handler>::Data: 'static {
         let lock = IRQ_DATA_ARRAY.lock();
         let irq_data = lock.iter().find(|x|x.irq == irq).unwrap();

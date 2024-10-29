@@ -3,13 +3,13 @@
 //! I2c kernel interface
 //!
 
-#[cfg(feature = "starry")]
+#[cfg(feature = "arceos")]
 mod timekeeping {
-    pub use axhal::time::current_time_nanos;
+    pub use axhal::time::monotonic_time_nanos;
 
     /// Get Ktime
     pub fn ktime_get() -> u64 {
-        current_time_nanos()
+        monotonic_time_nanos()
     }
 }
 
