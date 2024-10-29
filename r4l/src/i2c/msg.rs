@@ -88,7 +88,7 @@ pub const STATUS_MASK: u32 = genmask(2, 0);
 pub const DW_IC_ERR_TX_ABRT:u32 = 0x1;
 
 /// an I2C transaction segment beginning with START 
-#[derive(Debug) ]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub struct I2cMsgInfo{
     ///  Slave address, either 7 or 10 bits. When this is a 10 bit address,
