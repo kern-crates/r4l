@@ -26,7 +26,7 @@ pub enum LogLevel {
     Cont,
 }
 
-#[cfg(feature = "starry")]
+#[cfg(feature = "arceos")]
 pub mod log {
     pub use axlog;
     #[doc(hidden)]

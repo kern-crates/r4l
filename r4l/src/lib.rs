@@ -29,7 +29,17 @@ pub mod print;
 pub mod str;
 pub mod sync;
 pub mod uapi;
+pub mod types;
 pub mod irq;
+pub mod io;
+pub mod regmap;
+pub mod math;
+pub mod delay;
+// pub mod completion;
+pub mod timekeeping;
+
+/// driver
+pub mod i2c;
 
 pub use build_error::build_error;
 
@@ -43,7 +53,7 @@ pub trait Module: Sized + Sync + Send {
     /// should do.
     ///
     /// Equivalent to the `module_init` macro in the C API.
-    fn init(module: &'static ThisModule) -> error::Result<Self>;
+    fn init(name: &'static str::CStr, module: &'static ThisModule) -> error::Result<Self>;
 }
 
 /// Replace Linux `THIS_MODULE` in the C API.

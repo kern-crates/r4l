@@ -7,14 +7,17 @@
 
 use crate::pr_info;
 use crate::prelude::*;
+use crate::platform::PlatformDevice;
 use core::any::Any;
-use of::OfNode;
+use crate::sync::Arc;
+use of_fdt::OfNode;
 
+#[derive(Clone)]
 pub struct Device {
     of_node: OfNode<'static>,
     // Driver matched the first device compatiable
     drv_matched: Option<&'static str>,
-    drv_data: Option<Box<dyn Any>>,
+    drv_data: Option<Arc<dyn Any>>,
 }
 
 impl Device {
@@ -26,12 +29,20 @@ impl Device {
         }
     }
 
+    pub fn get_node(&self) -> OfNode<'static> {
+        self.of_node
+    }
+
+    pub fn get_resource(&self, index: usize) -> Result<usize> {
+        crate::of::of_membase_resource_get(self.of_node, index)
+    }
+
     pub fn irq_resource(&self, index: usize) -> Result<u32> {
         crate::of::of_irq_get(self.of_node, index)
     }
 
-    pub fn set_drv_data<T: Any + 'static>(&mut self, drv_data: T) {
-        self.drv_data = Some(Box::new(drv_data));
+    pub fn set_drv_data<T: Any + 'static + Clone>(&mut self, drv_data: T) {
+        self.drv_data = Some(Arc::new(drv_data));
     }
 
     pub fn get_drv_data<T: Any>(&self) -> Option<&T> {
@@ -44,10 +55,22 @@ impl Device {
             None => false,
         }
     }
+
+    pub fn device_property_read_u32(&self, propname: &'static CStr) -> Result<u32> {
+        let res = of_fdt::of_property_read_u32(self.of_node, propname, 0);
+        match res {
+            Some(val) => { Ok(val)}
+            None => { Err(EINVAL) }
+        }
+    }
+
+    pub fn from_dev(pdev: &PlatformDevice) -> Self {
+        pdev.get_device()
+    }
 }
 
 pub trait DeviceOps {
-    fn set_drv_data<T: Any + 'static>(&mut self, drv_data: T);
+    fn set_drv_data<T: Any + 'static + Clone>(&mut self, drv_data: T);
     fn get_drv_data<T: Any>(&self) -> Option<&T>;
     fn compatible_match(&self, compatible: &'static str) -> bool;
 }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 
-#[cfg(feature = "starry")]
+#[cfg(feature = "arceos")]
 mod os_irq_interface {
     use axhal::irq::register_handler;
 

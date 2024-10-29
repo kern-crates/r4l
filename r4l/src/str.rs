@@ -38,3 +38,9 @@ mod str {
 }
 
 pub use str::*;
+
+/// A convenience alias for [`core::format_args`].
+#[macro_export]
+macro_rules! fmt {
+    ($($f:tt)*) => ( core::format_args!($($f)*) )
+}
