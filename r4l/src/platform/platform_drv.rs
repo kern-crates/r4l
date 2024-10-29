@@ -37,7 +37,7 @@ impl PlatformDriver {
         self.id_table = id_table;
     }
 
-    fn register(this: Arc<Self>, name: &'static CStr, module: &'static ThisModule) -> Result {
+    fn register(_this: Arc<Self>, _name: &'static CStr, _module: &'static ThisModule) -> Result {
         Ok(())
     }
 
@@ -108,7 +108,7 @@ impl<T: Driver> driver::DriverOps for Adapter<T> {
         Ok(())
     }
 
-    fn unregister(pdrv: &mut Self::RegType) {}
+    fn unregister(_pdrv: &mut Self::RegType) {}
 }
 
 impl<T: Driver> Adapter<T> {

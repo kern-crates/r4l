@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 
 use crate::prelude::*;
-use of::OfNode;
+use of_fdt::OfNode;
 
 const MAX_PHANDLE_ARGS: usize = 32;
 struct OfPhandleArgs {
@@ -20,7 +20,7 @@ impl OfPhandleArgs {
         let mut res = Self{np: Some(parent), args_count: intsize, args: [0;MAX_PHANDLE_ARGS]};
 
         for i in 0..intsize {
-            res.args[i] = of::of_property_read_u32(node, "interrupts", (index * intsize) + i).ok_or(EINVAL)?;
+            res.args[i] = of_fdt::of_property_read_u32(node, "interrupts", (index * intsize) + i).ok_or(EINVAL)?;
         }
         pr_debug!(" intspec={:?}\n", res.args);
         // TODO: Check if there are any interrupt-map translations to process 

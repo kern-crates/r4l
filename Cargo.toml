@@ -6,6 +6,7 @@ members = [
     "drivers/i2c/busses/i2c-designware",
     "r4l/",
     "macros/",
+    "of/",
 ]
 resolver = "2"
 

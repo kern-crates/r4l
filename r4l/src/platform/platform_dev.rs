@@ -3,7 +3,7 @@
 //! A platform device.
 use crate::{device, io};
 use core::any::Any;
-use of::OfNode;
+use of_fdt::OfNode;
 
 use crate::error::Result;
 
@@ -32,13 +32,19 @@ impl PlatformDevice {
     }
 
     /// get device
-    pub fn get_device(&self) -> &device::Device {
-        &self.device
+    pub fn get_device(&self) -> device::Device {
+       self.device.clone()
     }
+
+    /// get node
+    pub fn of_node(&self) -> OfNode<'static> {
+        self.device.get_node()
+    }
+
 }
 
 impl device::DeviceOps for PlatformDevice {
-    fn set_drv_data<T: Any + 'static>(&mut self, drv_data: T) {
+    fn set_drv_data<T: Any + 'static + Clone>(&mut self, drv_data: T) {
         self.device.set_drv_data(drv_data);
     }
 

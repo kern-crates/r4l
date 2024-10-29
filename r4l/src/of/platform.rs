@@ -6,13 +6,13 @@ use crate::platform::{platform_device_register, PlatformDevice};
 use crate::pr_debug;
 use crate::sync::Arc;
 use crate::sync::Mutex;
-use of::OfNode;
+use of_fdt::OfNode;
 
 const OF_DEFAULT_BUS_MATCH_TABLE: [&'static str; 4] =
     ["simple-bus", "simple-mfd", "isa", "arm,amba-bus"];
 
 fn of_platform_bus_device_create(node: OfNode<'static>) -> Result {
-    if !of::of_device_is_available(node) {
+    if !of_fdt::of_device_is_available(node) {
         return Ok(());
     }
     let pdev = Arc::new(Mutex::new(PlatformDevice::new(node)));
@@ -21,7 +21,7 @@ fn of_platform_bus_device_create(node: OfNode<'static>) -> Result {
 }
 
 pub fn of_platform_default_populate_init() -> Result {
-    let bus_node = of::find_compatible_node(&OF_DEFAULT_BUS_MATCH_TABLE);
+    let bus_node = of_fdt::find_compatible_node(&OF_DEFAULT_BUS_MATCH_TABLE);
     for i in bus_node {
         crate::pr_info!("bus node: {:?} ", i.compatible().unwrap().first());
         for c in i.children() {

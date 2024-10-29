@@ -5,14 +5,17 @@ use core::ffi::{c_int, c_void};
 
 struct InitcallAddrPair(*const u8, *const u8);
 
-pub fn driver_framework_init() {
-    subsys_fn_init();
+pub fn driver_framework_init(dtb_virt_addr: *const u8) {
+    subsys_fn_init(dtb_virt_addr);
     module_fn_init();
 }
 
-fn subsys_fn_init() {
+fn subsys_fn_init(dtb_virt_addr: *const u8) {
+    // # Safety
+    // unsafe because it dereferences a raw pointer.
+    unsafe { of_fdt::init_fdt_ptr(dtb_virt_addr) };
     if let Err(e) = crate::of::of_platform_default_populate_init() {
-        panic!("subsys fn init failed");
+        panic!("subsys fn init failed, {}", e);
     }
 }
 
