@@ -151,9 +151,9 @@ pub struct Module<T: DriverOps> {
 }
 
 impl<T: DriverOps> crate::Module for Module<T> {
-    fn init(module: &'static ThisModule) -> Result<Self> {
+    fn init(name: &'static CStr, module: &'static ThisModule) -> Result<Self> {
         Ok(Self {
-            _driver: Registration::new_pinned(c_str!("no-name"), module)?,
+            _driver: Registration::new_pinned(name, module)?,
         })
     }
 }
