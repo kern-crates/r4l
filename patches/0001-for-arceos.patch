@@ -1,0 +1,220 @@
+From cd0c40c5c3b93730737288fdda82fb30197b3da3 Mon Sep 17 00:00:00 2001
+From: happy-thw <tangq7443@163.com>
+Date: Tue, 29 Oct 2024 11:37:59 +0800
+Subject: [PATCH] in order to use the cross-kernel drivers framework
+
+---
+ modules/axdriver/Cargo.toml                   |  7 ++++-
+ modules/axdriver/src/lib.rs                   |  9 +++++-
+ modules/axhal/Cargo.toml                      |  2 +-
+ modules/axhal/linker.lds.S                    | 28 +++++++++++++++++++
+ .../platform/aarch64_bsta1000b/dw_apb_uart.rs |  2 +-
+ modules/axmm/src/lib.rs                       | 12 +++++---
+ modules/axruntime/src/lib.rs                  |  6 ++--
+ platforms/aarch64-bsta1000b.toml              |  6 ++++
+ 8 files changed, 61 insertions(+), 11 deletions(-)
+
+diff --git a/modules/axdriver/Cargo.toml b/modules/axdriver/Cargo.toml
+index 1bc362a..7f9ee9b 100644
+--- a/modules/axdriver/Cargo.toml
++++ b/modules/axdriver/Cargo.toml
+@@ -43,4 +43,9 @@ axdriver_virtio = { git = "https://github.com/arceos-org/axdriver_crates.git", t
+ axalloc = { workspace = true, optional = true }
+ axhal = { workspace = true, optional = true }
+ axconfig = { workspace = true, optional = true }
+-axdma = { workspace = true, optional = true }
+\ No newline at end of file
++axdma = { workspace = true, optional = true }
++
++# r4l driver
++r4l = { path = "../../r4l/r4l/" , features=["arceos"] }
++i2c_designware = { path = "../../r4l/drivers/i2c/busses/i2c-designware" , features=["arceos"] }
++ox3c_raw = { path = "../../r4l/drivers/i2c/ox3c-raw" , features=["arceos"] }
+diff --git a/modules/axdriver/src/lib.rs b/modules/axdriver/src/lib.rs
+index 659d95c..1254eec 100644
+--- a/modules/axdriver/src/lib.rs
++++ b/modules/axdriver/src/lib.rs
+@@ -67,6 +67,9 @@ extern crate alloc;
+ #[macro_use]
+ mod macros;
+ 
++extern crate ox3c_raw;
++extern crate i2c_designware;
++
+ mod bus;
+ mod drivers;
+ mod dummy;
+@@ -83,6 +86,7 @@ pub mod prelude;
+ #[allow(unused_imports)]
+ use self::prelude::*;
+ pub use self::structs::{AxDeviceContainer, AxDeviceEnum};
++use axhal::mem::phys_to_virt;
+ 
+ #[cfg(feature = "block")]
+ pub use self::structs::AxBlockDevice;
+@@ -148,10 +152,13 @@ impl AllDevices {
+ }
+ 
+ /// Probes and initializes all device drivers, returns the [`AllDevices`] struct.
+-pub fn init_drivers() -> AllDevices {
++pub fn init_drivers(dtb: usize) -> AllDevices {
+     info!("Initialize device drivers...");
+     info!("  device model: {}", AllDevices::device_model());
+ 
++    let dtb_vaddr = phys_to_virt(dtb.into()).as_usize() as *const u8;
++    r4l::init::driver_framework_init(dtb_vaddr);
++
+     let mut all_devs = AllDevices::default();
+     all_devs.probe();
+ 
+diff --git a/modules/axhal/Cargo.toml b/modules/axhal/Cargo.toml
+index 86da2ef..525917c 100644
+--- a/modules/axhal/Cargo.toml
++++ b/modules/axhal/Cargo.toml
+@@ -31,7 +31,7 @@ int_ratio = "0.1"
+ lazyinit = "0.2"
+ percpu = "0.1"
+ memory_addr = "0.3"
+-handler_table = "0.1"
++handler_table = { path = "../../crates/handler_table/" }
+ page_table_entry = "0.4"
+ page_table_multiarch = { version = "0.4", optional = true }
+ axlog = { workspace = true }
+diff --git a/modules/axhal/linker.lds.S b/modules/axhal/linker.lds.S
+index 2ec5f00..33b3132 100644
+--- a/modules/axhal/linker.lds.S
++++ b/modules/axhal/linker.lds.S
+@@ -32,6 +32,34 @@ SECTIONS
+         *(.data .data.*)
+         *(.sdata .sdata.*)
+         *(.got .got.*)
++
++        _initcall1 = .;
++        KEEP(*(.initcall1.*))
++        _initcall1_end =.;
++
++        _initcall2 = .;
++        KEEP(*(.initcall2.*))
++        _initcall2_end =.;
++
++        _initcall3 = .;
++        KEEP(*(.initcall3.*))
++        _initcall3_end =.;
++
++        _initcall4 = .;
++        KEEP(*(.initcall4.*))
++        _initcall4_end =.;
++
++        _initcall5 = .;
++        KEEP(*(.initcall5.*))
++        _initcall5_end =.;
++
++        _initcall6 = .;
++        KEEP(*(.initcall6.*))
++        _initcall6_end =.;
++
++        _initcall7 = .;
++        KEEP(*(.initcall7.*))
++        _initcall7_end =.;
+     }
+ 
+     .tdata : ALIGN(0x10) {
+diff --git a/modules/axhal/src/platform/aarch64_bsta1000b/dw_apb_uart.rs b/modules/axhal/src/platform/aarch64_bsta1000b/dw_apb_uart.rs
+index ef6b327..19bc7a4 100644
+--- a/modules/axhal/src/platform/aarch64_bsta1000b/dw_apb_uart.rs
++++ b/modules/axhal/src/platform/aarch64_bsta1000b/dw_apb_uart.rs
+@@ -39,6 +39,6 @@ pub fn init_irq() {
+ }
+ 
+ /// UART IRQ Handler
+-pub fn handle() {
++pub fn handle(_idx:u32) {
+     trace!("Uart IRQ Handler");
+ }
+diff --git a/modules/axmm/src/lib.rs b/modules/axmm/src/lib.rs
+index ef579b1..ffb7461 100644
+--- a/modules/axmm/src/lib.rs
++++ b/modules/axmm/src/lib.rs
+@@ -11,11 +11,11 @@ mod aspace;
+ pub use self::aspace::AddrSpace;
+ 
+ use axerrno::{AxError, AxResult};
+-use axhal::mem::phys_to_virt;
++use axhal::mem::{ phys_to_virt, MemRegionFlags };
+ use axhal::paging::PagingError;
+ use kspin::SpinNoIrq;
+ use lazyinit::LazyInit;
+-use memory_addr::{va, PhysAddr};
++use memory_addr::{va, PhysAddr, pa};
+ 
+ static KERNEL_ASPACE: LazyInit<SpinNoIrq<AddrSpace>> = LazyInit::new();
+ 
+@@ -56,11 +56,15 @@ pub fn kernel_page_table_root() -> PhysAddr {
+ ///
+ /// It mainly sets up the kernel virtual memory address space and recreate a
+ /// fine-grained kernel page table.
+-pub fn init_memory_management() {
++pub fn init_memory_management(dtb: usize) {
+     info!("Initialize virtual memory management...");
+ 
+-    let kernel_aspace = new_kernel_aspace().expect("failed to initialize kernel address space");
++    let mut kernel_aspace = new_kernel_aspace().expect("failed to initialize kernel address space");
+     debug!("kernel address space init OK: {:#x?}", kernel_aspace);
++    
++    let dtb_pa = pa!(dtb);
++    kernel_aspace.map_linear(phys_to_virt(dtb_pa), dtb_pa, 0x10_0000, (MemRegionFlags::RESERVED | MemRegionFlags::READ).into())
++                            .expect("failed to mapping dtb address space");
+     KERNEL_ASPACE.init_once(SpinNoIrq::new(kernel_aspace));
+     unsafe { axhal::arch::write_page_table_root(kernel_page_table_root()) };
+ }
+diff --git a/modules/axruntime/src/lib.rs b/modules/axruntime/src/lib.rs
+index 8207ea1..b953efc 100644
+--- a/modules/axruntime/src/lib.rs
++++ b/modules/axruntime/src/lib.rs
+@@ -145,7 +145,7 @@ pub extern "C" fn rust_main(cpu_id: usize, dtb: usize) -> ! {
+     init_allocator();
+ 
+     #[cfg(feature = "paging")]
+-    axmm::init_memory_management();
++    axmm::init_memory_management(dtb);
+ 
+     info!("Initialize platform devices...");
+     axhal::platform_init();
+@@ -156,7 +156,7 @@ pub extern "C" fn rust_main(cpu_id: usize, dtb: usize) -> ! {
+     #[cfg(any(feature = "fs", feature = "net", feature = "display"))]
+     {
+         #[allow(unused_variables)]
+-        let all_devices = axdriver::init_drivers();
++        let all_devices = axdriver::init_drivers(dtb);
+ 
+         #[cfg(feature = "fs")]
+         axfs::init_filesystems(all_devices.block);
+@@ -252,7 +252,7 @@ fn init_interrupt() {
+         axhal::time::set_oneshot_timer(deadline);
+     }
+ 
+-    axhal::irq::register_handler(TIMER_IRQ_NUM, || {
++    axhal::irq::register_handler(TIMER_IRQ_NUM, |_| {
+         update_timer();
+         #[cfg(feature = "multitask")]
+         axtask::on_timer_tick();
+diff --git a/platforms/aarch64-bsta1000b.toml b/platforms/aarch64-bsta1000b.toml
+index 48f66ef..621e3eb 100644
+--- a/platforms/aarch64-bsta1000b.toml
++++ b/platforms/aarch64-bsta1000b.toml
+@@ -25,6 +25,12 @@ kernel-aspace-base = "0xffff_0000_0000_0000"
+ kernel-aspace-size = "0x0000_ffff_ffff_f000"
+ # MMIO regions with format (`base_paddr`, `size`).
+ mmio-regions = [
++    ["0x20000000", "0x1000"], # I2C0
++    ["0x20001000", "0x1000"], # I2C1
++    ["0x20002000", "0x1000"], # I2C2
++    ["0x20003000", "0x1000"], # I2C3
++    ["0x20004000", "0x1000"], # I2C4
++    ["0x20005000", "0x1000"], # I2C5
+     ["0x20008000", "0x1000"], # uart8250 UART0
+     ["0x32000000", "0x8000"], # arm,gic-400
+     ["0x32011000", "0x1000"], # CPU CSR
+-- 
+2.25.1
+
