@@ -6,24 +6,35 @@
 
 use kernel::{
     driver,
-    irq,
-    device::Device,
-    module_platform_driver, of, platform,
-    sync::Arc,
+    c_str,
     i2c::{
-        timing::{self, I2cTiming, I2cSpeedMode },
-        msg::{self, I2cMsgFlags, I2cMsgInfo, GeneralI2cMsgInfo },
+        self,
+        I2cAlgo,
+        I2cMsg,
+        I2cAdapter,
         functionality::I2cFuncFlags,
+        msg::{
+            self, I2cMsgFlags, I2cMsgInfo, GeneralI2cMsgInfo,
+        },
+        timing::{
+            self, I2cTiming, I2cSpeedMode,
+        }
     },
-    timekeeping::read_poll_timeout,
-    sync::SpinLock,
     types::genmask,
+    timekeeping::read_poll_timeout,
+    device::Device,
+    
+    module_platform_driver, of, platform,
+    sync::{Arc,SpinLock, Mutex },
     prelude::*,
     regmap,
     math,
     delay,
-    new_spinlock,
+    irq,
     // completion::Completion,
+    new_spinlock,
+
+
 };
 
 module_platform_driver! {
@@ -40,7 +51,11 @@ kernel::define_of_id_table! {DW_I2C_OF_MATCH_TABLE, (), [
     (of::DeviceId::Compatible("snps,designware-i2c"),None),
 ]}
 
-struct DwI2cData();
+struct DwI2cData {
+    i2c_adapter: I2cAdapter,
+    driver: I2cDwMasterDriver,
+    irq: Mutex<Vec<irq::Registration>>,
+}
 
 impl driver::DeviceRemoval for DwI2cData {
     fn device_remove(&self) {
@@ -48,13 +63,60 @@ impl driver::DeviceRemoval for DwI2cData {
     }
 }
 
+impl DwI2cData {
+    fn new(
+        driver: I2cDwMasterDriver,
+        parent: Device,
+        pdev: &mut platform::Device,
+        irq: u32,
+    ) -> Arc<Self> {
+        let arc_instance = Arc::new(Self {
+            i2c_adapter: I2cAdapter::new::<DwI2cAlgo>(
+                c_str!("Synopsys DesignWare I2C adapter"),
+                &THIS_MODULE,
+                pdev.of_node(), 
+                parent, 
+            ),
+            driver: driver,
+            // TODO: ugly method to deal with irq's data.
+            irq: Mutex::new(Vec::new()),
+        });
+        let irq_register= irq::Registration::try_new::<DwI2cIrqHandler>(
+            irq,
+            arc_instance.clone(),
+            irq::Flags::SHARED |irq::Flags::COND_SUSPEND ,
+            fmt!("dw_i2c_irq_{irq}")).unwrap();
+        arc_instance.irq.lock().push(irq_register);
+        arc_instance
+    }
+}
+
+struct DwI2cAlgo;
+#[vtable]
+impl I2cAlgo for DwI2cAlgo {
+    type Data = Arc<DwI2cData>;
+    fn master_xfer(data: &Self::Data, msg: &I2cMsg, _msg_len: usize) -> Result<i32> {
+        pr_info!("master_xfer....");
+        let trans_msgs = msg.into_array()?;
+        let master_driver = &data.driver;
+        master_driver.master_transfer(trans_msgs)
+    }
+
+    fn functionality(data: &Self::Data) -> u32 {
+        pr_info!("functionality....");
+        let master_driver = &data.driver;
+        master_driver.get_functionality()
+    }
+}
+
 struct DwI2cIrqHandler;
 impl irq::Handler for DwI2cIrqHandler {
-    type Data = i32;
+    type Data = Arc<DwI2cData>;
 
-    fn handle_irq(data: &i32) -> irq::Return {
-        pr_info!("handled i2c irq get data {} ", data);
-        irq::Return::Handled
+    fn handle_irq(data: &Self::Data) -> irq::Return {
+        pr_info!("handled i2c irq ...");
+        let master_driver = &data.driver;
+        master_driver.irq_handler()
     }
 }
 
@@ -81,9 +143,17 @@ impl platform::Driver for DwI2cDriver {
         let mut i2c_master_driver = I2cDwMasterDriver::new(driver_config, reg_base);
         i2c_master_driver.setup()?;
 
-        // Todo: create data
+        // create data
+        let data: Arc<DwI2cData> = DwI2cData::new(
+            i2c_master_driver,
+            dev, 
+            pdev, 
+            irq as u32,
+        );
 
-        Ok(Arc::new(DwI2cData()))
+        // register adapter
+        (&(data.i2c_adapter)).add_numbered_adapter::<DwI2cAlgo>(data.clone())?;
+        Ok(data)
     }
 }
 
@@ -125,8 +195,6 @@ pub(crate) struct I2cDwCoreDriver {
 unsafe impl Sync for I2cDwCoreDriver {}
 unsafe impl Send for I2cDwCoreDriver {}
 
-
-#[allow(dead_code)]
 impl I2cDwCoreDriver {
     pub(crate) fn new(config: I2cDwDriverConfig, base_addr: usize) -> Self {
         Self {
@@ -452,10 +520,8 @@ impl I2cDwCoreDriver {
         let mut try_cnt = 100;
         loop {
             self.disable_nowait();
-            pr_debug!("==== usleep before ======");
-            // delay::usleep(100);
+            delay::usleep(100);
             // check enable_status
-            pr_debug!("==== usleep after ======");
             let status = regmap::reg_read(self.base, DW_IC_ENABLE_STATUS);
             if status & 1 == 0 {
                 break;
@@ -597,6 +663,7 @@ impl MasterXfer {
         let _ = core_driver.ic_enable_status();
     }
 
+    /// Interrupt service routine.
     fn irq_process(&mut self, master_driver: &I2cDwMasterDriver) -> TransferResult {
         let core_driver = &master_driver.driver;
 
