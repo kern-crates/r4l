@@ -4,6 +4,7 @@ members = [
     "drivers/sample/minimal/",
     "drivers/sample/platform/",
     "drivers/i2c/busses/i2c-designware",
+    "drivers/i2c/ox3c-raw",
     "r4l/",
     "macros/",
     "of/",

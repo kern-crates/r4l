@@ -1,0 +1,13 @@
+[package]
+name = "ox3c_raw"
+version = "0.1.0"
+edition = "2021"
+description = "An r4l i2c_clinet driver sample"
+license = "GPL-3.0-or-later OR Apache-2.0"
+homepage = ""
+
+[features]
+arceos=["kernel/arceos"]
+default =["arceos"]
+[dependencies]
+kernel = { package="r4l", path = "../../../r4l/"}
